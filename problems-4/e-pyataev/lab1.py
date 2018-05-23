@@ -39,11 +39,16 @@ def find_link(search_history):
 
     founded_link = None
     find = False
-    content_div = soup.find(id="mw-content-text").find(class_="mw-parser-output")
+    content_div = soup.find_all('div', attrs={'class' : "mw-parser-output"})
+
     for element in content_div.find_all("p", recursive=False):
         element = remove_parentheses(str(element))
         element = bs4.BeautifulSoup(element, "html.parser").find('p', recursive=False)
         for link in element.find_all("a", recursive=False):
+            print(link.get('href'))
+            classes = link.get('class') if link.get('class') is not None else []
+            if link.get('href') is None or 'new' in classes:
+                continue
             founded_link = urllib.parse.urljoin('https://en.wikipedia.org/', link.get('href'))
             if founded_link in search_history: continue
             find = True
@@ -63,13 +68,13 @@ def crawl(search_history, target_url):
         return True
 
 if __name__ == "__main__":
-    start_url = "https://en.wikipedia.org/wiki/Special:Random"
+    start_url = input("Write link : ")
     target_url = "https://en.wikipedia.org/wiki/Philosophy"
     links_chain = [start_url]
 
     try:
         while crawl(links_chain, target_url):
-            print(links_chain[-1])
+            print(urllib.parse.unquote(links_chain[-1]))
 
             link = find_link(links_chain)
             if not link:
