@@ -56,7 +56,7 @@ def find_link(search_history, lang):
                     break
 
                 classes = link.get('class') if link.get('class') is not None else []
-                if link.parent.name in ('i', 'sup') or link.get('href') is None or 'new' in classes:
+                if link.parent.name in ('i', 'sup', 'span') or link.get('href') is None or 'new' in classes:
                     link = link.find_next_sibling()
                     continue
 
