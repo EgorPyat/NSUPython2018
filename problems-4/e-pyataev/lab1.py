@@ -3,6 +3,7 @@ import urllib
 import bs4
 import requests
 import re
+import sys
 
 def remove_parentheses(text):
     sharp_brackets = 0
@@ -69,20 +70,21 @@ def crawl(search_history, target_url):
         return True
 
 if __name__ == "__main__":
-    target_url = ("https://en.wikipedia.org/wiki/Philosophy", "https://ru.wikipedia.org/wiki/%D0%A4%D0%B8%D0%BB%D0%BE%D1%81%D0%BE%D1%84%D0%B8%D1%8F")
-    start_url = input("Write link: ")
-    lang = re.search('://(\w+).', start_url).group(1)
-    links_chain = [start_url]
+    if(len(sys.argv) == 2):
+        try:
+            target_url = ("https://en.wikipedia.org/wiki/Philosophy", "https://ru.wikipedia.org/wiki/%D0%A4%D0%B8%D0%BB%D0%BE%D1%81%D0%BE%D1%84%D0%B8%D1%8F")
+            start_url = sys.argv[1]
+            lang = re.search('://(\w+).', start_url).group(1)
+            links_chain = [start_url]
 
-    try:
-        while crawl(links_chain, target_url):
-            print(urllib.parse.unquote(links_chain[-1]))
-            link = find_link(links_chain, lang)
-            if not link:
-                print("No link was found!")
-                break
+            while crawl(links_chain, target_url):
+                print(urllib.parse.unquote(links_chain[-1]))
+                link = find_link(links_chain, lang)
+                if not link:
+                    print("No link was found!")
+                    break
 
-            links_chain.append(link)
-            time.sleep(2)
-    except KeyboardInterrupt:
-        pass
+                links_chain.append(link)
+                time.sleep(2)
+        except Exception as e:
+            print(e)
