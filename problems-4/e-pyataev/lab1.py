@@ -41,21 +41,30 @@ def find_link(search_history, lang):
 
     founded_link = None
     find = False
-    for content_div in soup.find_all('div', attrs={'class':'mw-parser-output'}):
-        for element in content_div.find_all("p", recursive=False):
-            element = remove_parentheses(str(element))
-            element = bs4.BeautifulSoup(element, "html.parser").find('p')
-            for link in element.find_all("a", recursive=False):
+    content_div = soup.find('div', attrs={'class':'mw-parser-output'})
+    element = content_div.find()
+
+    while element:
+        if find:
+            break
+        if element.name in ['p', 'ul', 'h2']:
+            el = remove_parentheses(str(element))
+            link = bs4.BeautifulSoup(el, "html.parser").find('a')
+            while True:
+                if not link:
+                    element = element.find_next_sibling()
+                    break
+
                 classes = link.get('class') if link.get('class') is not None else []
-                if link.get('href') is None or 'new' in classes:
+                if link.parent.name in ('i', 'sup') or link.get('href') is None or 'new' in classes:
+                    link = link.find_next_sibling()
                     continue
+
                 founded_link = 'https://' + lang + '.wikipedia.org' + link.get('href')
                 find = True
                 break
-            if find:
-                break
-        if not founded_link:
-            return
+        else:
+            element = element.find_next_sibling()
 
     return founded_link
 
@@ -87,4 +96,6 @@ if __name__ == "__main__":
                 links_chain.append(link)
                 time.sleep(2)
         except Exception as e:
-            print(e)
+            print("Ooups! :\n++++++++++++++++++++++++++++\n", e)
+    else:
+        print("Wikipedia link is needed", file=sys.stderr)
